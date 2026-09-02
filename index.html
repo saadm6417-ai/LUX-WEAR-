@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0b0b">
+  <title>Lux Wear</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #0b0b0b;
+      min-height: 100%;
+    }
+    .page {
+      position: relative;
+      width: 100%;
+      max-width: 1024px;
+      margin: 0 auto;
+      line-height: 0;
+      overflow: hidden;
+    }
+    .design {
+      display: block;
+      width: 100%;
+      height: auto;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+    .hotspot {
+      position: absolute;
+      display: block;
+      z-index: 5;
+      border-radius: 22px;
+      -webkit-tap-highlight-color: transparent;
+      cursor: pointer;
+    }
+    .hotspot:focus-visible {
+      outline: 2px solid #e7b99e;
+      outline-offset: 3px;
+    }
+
+    /* Coordinates are percentages of the supplied 1024x1536 design. */
+    .messenger { left: 14%; top: 51.8%; width: 35%; height: 11.8%; }
+    .whatsapp  { left: 50.8%; top: 51.8%; width: 35%; height: 11.8%; }
+    .facebook  { left: 14%; top: 67.7%; width: 35%; height: 11.3%; }
+    .channel   { left: 50.8%; top: 67.7%; width: 35%; height: 11.3%; }
+    .washing   { left: 28%; top: 82.1%; width: 44%; height: 7.0%; }
+
+    @media (min-width: 1025px) {
+      body { padding: 16px 0; }
+      .page {
+        border-radius: 28px;
+        box-shadow: 0 0 45px rgba(0,0,0,.45);
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page" aria-label="Lux Wear">
+    <img class="design" src="home-design.jpg" alt="Lux Wear">
+
+    <a class="hotspot messenger"
+       href="https://m.me/106213022436745"
+       aria-label="التواصل مع Lux Wear عبر رسائل فيسبوك"></a>
+
+    <a class="hotspot whatsapp"
+       href="https://wa.me/201156857736"
+       target="_blank" rel="noopener"
+       aria-label="التواصل مع Lux Wear عبر واتساب"></a>
+
+    <a class="hotspot facebook"
+       href="https://www.facebook.com/share/1FHANBXvYw/"
+       target="_blank" rel="noopener"
+       aria-label="متابعة صفحة Lux Wear على فيسبوك"></a>
+
+    <a class="hotspot channel"
+       href="https://whatsapp.com/channel/0029VbCXzKy2ZjCiD5hnA72Y"
+       target="_blank" rel="noopener"
+       aria-label="متابعة قناة Lux Wear على واتساب"></a>
+
+    <a class="hotspot washing"
+       href="washing.html"
+       aria-label="فتح تعليمات الغسيل"></a>
+  </main>
+</body>
+</html>

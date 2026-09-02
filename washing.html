@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0b0b">
+  <title>تعليمات الغسيل - Lux Wear</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #0b0b0b;
+      min-height: 100%;
+    }
+    .page {
+      position: relative;
+      width: 100%;
+      max-width: 1024px;
+      margin: 0 auto;
+      line-height: 0;
+      overflow: hidden;
+    }
+    .design {
+      display: block;
+      width: 100%;
+      height: auto;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+    .back {
+      position: absolute;
+      left: 3.5%;
+      top: 2.9%;
+      width: 7.5%;
+      height: 5.0%;
+      z-index: 5;
+      border-radius: 50%;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .back:focus-visible {
+      outline: 2px solid #e7b99e;
+      outline-offset: 3px;
+    }
+    @media (min-width: 1025px) {
+      body { padding: 16px 0; }
+      .page {
+        border-radius: 28px;
+        box-shadow: 0 0 45px rgba(0,0,0,.45);
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page" aria-label="تعليمات الغسيل">
+    <img class="design" src="washing-design.jpg" alt="تعليمات الغسيل - Lux Wear">
+    <a class="back" href="index.html" aria-label="العودة إلى الصفحة الرئيسية"></a>
+  </main>
+</body>
+</html>
