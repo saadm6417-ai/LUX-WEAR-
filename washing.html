@@ -5,29 +5,46 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#0b0b0b">
   <title>تعليمات الغسيل - Lux Wear</title>
+
   <style>
-    * { box-sizing: border-box; }
+    * { 
+      box-sizing: border-box; 
+    }
+
     html, body {
       margin: 0;
       padding: 0;
       background: #0b0b0b;
       min-height: 100%;
+      width: 100%;
     }
+
     .page {
       position: relative;
+
+      /* التعديل هنا فقط:
+         الصفحة تتكيف مع عرض شاشة الجهاز */
       width: 100%;
-      max-width: 1024px;
+      max-width: 100%;
+
       margin: 0 auto;
       line-height: 0;
       overflow: hidden;
     }
+
     .design {
       display: block;
       width: 100%;
       height: auto;
+      max-width: 100%;
+
       user-select: none;
       -webkit-user-drag: none;
+
+      /* يمنع الفراغ الصغير أسفل الصورة */
+      vertical-align: top;
     }
+
     .back {
       position: absolute;
       left: 3.5%;
@@ -38,23 +55,91 @@
       border-radius: 50%;
       -webkit-tap-highlight-color: transparent;
     }
+
     .back:focus-visible {
       outline: 2px solid #e7b99e;
       outline-offset: 3px;
     }
-    @media (min-width: 1025px) {
-      body { padding: 16px 0; }
+
+    /*
+      على الشاشات الكبيرة:
+      نخلي التصميم يكبر حسب مساحة الشاشة
+      مع الحفاظ على نسبة أبعاد الصورة.
+    */
+    @media (min-width: 768px) {
+
+      body {
+        width: 100vw;
+        min-height: 100dvh;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        padding: 0;
+      }
+
       .page {
-        border-radius: 28px;
-        box-shadow: 0 0 45px rgba(0,0,0,.45);
+        width: min(
+          100vw,
+          calc(100dvh * var(--design-ratio, 0.562))
+        );
+
+        max-width: 100vw;
+        margin: 0 auto;
+      }
+    }
+
+    /*
+      على الموبايل:
+      التصميم يأخذ عرض شاشة الموبايل بالكامل.
+    */
+    @media (max-width: 767px) {
+
+      body {
+        width: 100%;
+        min-height: 100%;
+        display: block;
+      }
+
+      .page {
+        width: 100vw;
+        max-width: 100vw;
+        margin: 0;
+      }
+
+      .design {
+        width: 100vw;
+        max-width: 100vw;
+        height: auto;
       }
     }
   </style>
 </head>
+
 <body>
+
   <main class="page" aria-label="تعليمات الغسيل">
-    <img class="design" src="washing-design.jpg" alt="تعليمات الغسيل - Lux Wear">
-    <a class="back" href="index.html" aria-label="العودة إلى الصفحة الرئيسية"></a>
+
+    <img
+      class="design"
+      src="washing-design.jpg"
+      alt="تعليمات الغسيل - Lux Wear"
+      onload="
+        document.documentElement.style.setProperty(
+          '--design-ratio',
+          this.naturalWidth / this.naturalHeight
+        )
+      "
+    >
+
+    <a
+      class="back"
+      href="index.html"
+      aria-label="العودة إلى الصفحة الرئيسية">
+    </a>
+
   </main>
+
 </body>
 </html>
