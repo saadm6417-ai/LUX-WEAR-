@@ -14,12 +14,12 @@ language sql
 stable
 security definer
 set search_path = pg_catalog, auth
-as $
+as $luxadmin$
   select exists (
     select 1 from public.admin_users au
     where au.user_id = auth.uid()
   );
-$$;
+$luxadmin$;
 revoke all on function private.is_luxwear_admin() from public, anon;
 grant execute on function private.is_luxwear_admin() to authenticated;
 
