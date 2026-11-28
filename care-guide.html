@@ -10,6 +10,8 @@
 <div class="invoice"><div class="invicon">▤</div><p>ستجد الكود في الخانة المخصصة داخل فاتورتك باسم <span class="fieldname">كود العناية بالقطعة</span><br>أدخل هذا الكود هنا لعرض تعليمات العناية الخاصة بمنتجك.</p></div>
 <section class="result" id="careResult" aria-live="polite"><div class="resulthead"><div><h3 id="careName"></h3><p id="careDesc"></p></div><span class="codepill" id="careCodeTag"></span></div><div class="grid" id="careGrid"></div><div class="warning" id="careWarning"></div></section></section>
 <footer class="footer"><div class="brand">LUX WEAR</div><p>شكراً لاختيارك<br>نسعد بخدمتك دائماً</p><div class="small">ELEGANCE IN EVERY DETAIL</div></footer></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./supabase-config.js"></script>
 <script>
 (()=>{
 const $=id=>document.getElementById(id);
@@ -41,8 +43,12 @@ function renderLanguage(){
  document.querySelector('.footer p').innerHTML=w.thanks+'<br>'+w.service;
  if($('careResult').classList.contains('show'))show(false);
 }
-function show(scroll=true){const code=$('careCode').value.trim().toUpperCase(),g=guides[code],result=$('careResult'),en=lang==='en';$('careError').style.display='none';result.classList.remove('show');if(!g){$('careError').style.display='block';return;}
- $('careName').textContent=g.name[en?1:0];$('careDesc').textContent=en?g.desc.replace('إرشادات عامة','General Guidelines'):g.desc.replace('General Guidelines','إرشادات عامة');$('careCodeTag').textContent=code;$('careWarning').textContent=words[lang].warning+g.warning[en?1:0];$('careGrid').innerHTML=g.items.map(x=>`<article class="tile"><div class="ico">${x[0]}</div><b>${x[1][en?1:0]}</b><p>${x[2][en?1:0]}</p></article>`).join('');result.classList.add('show');if(scroll)result.scrollIntoView({behavior:'smooth',block:'nearest'});
+async function show(scroll=true){const code=$('careCode').value.trim().toUpperCase(),result=$('careResult'),en=lang==='en';$('careError').style.display='none';result.classList.remove('show');
+ let row=null; const db=window.luxwearSupabase;let databaseChecked=false;
+ if(db){const {data,error}=await db.from('care_guides').select('code,product_name,material,washing_instructions,drying_instructions,ironing_instructions,warnings').eq('code',code).eq('is_active',true).maybeSingle();databaseChecked=!error;if(!error)row=data;else console.warn('Care guide lookup failed:',error);}
+ if(!row&&!databaseChecked){const fallback=guides[code];if(fallback){$('careName').textContent=fallback.name[en?1:0];$('careDesc').textContent=en?'CARE INSTRUCTIONS':'إرشادات عامة';$('careCodeTag').textContent=code;$('careWarning').textContent=words[lang].warning+fallback.warning[en?1:0];$('careGrid').innerHTML=fallback.items.map(x=>`<article class="tile"><div class="ico">${x[0]}</div><b>${x[1][en?1:0]}</b><p>${x[2][en?1:0]}</p></article>`).join('');result.classList.add('show');if(scroll)result.scrollIntoView({behavior:'smooth',block:'nearest'});return;} $('careError').style.display='block';return;}
+ $('careName').textContent=row.product_name;$('careDesc').textContent=row.material||'';$('careCodeTag').textContent=code;$('careWarning').textContent=row.warnings||'';
+ const labels=en?['Washing','Drying','Ironing','Important notes']:['الغسيل','التجفيف','الكي','ملاحظات مهمة'];const values=[row.washing_instructions,row.drying_instructions,row.ironing_instructions,row.warnings];const icons=['✧','◌','☼','⌂'];const grid=$('careGrid');grid.replaceChildren();values.forEach((value,i)=>{const tile=document.createElement('article');tile.className='tile';const ico=document.createElement('div');ico.className='ico';ico.textContent=icons[i];const heading=document.createElement('b');heading.textContent=labels[i];const paragraph=document.createElement('p');paragraph.textContent=value||'—';tile.append(ico,heading,paragraph);grid.append(tile);});result.classList.add('show');if(scroll)result.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 $('findCare').addEventListener('click',()=>show());$('careCode').addEventListener('keydown',e=>{if(e.key==='Enter')show()});$('language').addEventListener('click',()=>{lang=lang==='ar'?'en':'ar';renderLanguage()});renderLanguage();
 })();
