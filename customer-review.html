@@ -119,7 +119,7 @@ if(q.o){
 const os=document.createElement('div');os.className='options';
 q.o.forEach((v,j)=>{
 const l=document.createElement('label');l.className='option';
-const r=document.createElement('input');r.type='radio';r.name='q'+(i+1);r.value=questions[i].o[j];r.required=true;
+const r=document.createElement('input');r.type='radio';r.name='q'+(i+1);r.value=v;r.required=true;
 const sp=document.createElement('span');sp.textContent=v;l.append(r,sp);os.append(l)
 });c.append(os)
 }else{
