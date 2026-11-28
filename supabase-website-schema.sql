@@ -9,5 +9,5 @@ drop policy if exists "Public read store hours" on public.store_hours; create po
 drop policy if exists "Public read active care guides" on public.care_guides; create policy "Public read active care guides" on public.care_guides for select to anon, authenticated using (is_active = true);
 drop policy if exists "Public read published content" on public.luxwear_content; create policy "Public read published content" on public.luxwear_content for select to anon, authenticated using (is_published = true);
 drop policy if exists "Public submit reviews" on public.customer_reviews; create policy "Public submit reviews" on public.customer_reviews for insert to anon, authenticated with check (status = 'pending');
-drop policy if exists "Authenticated read reviews" on public.customer_reviews; create policy "Authenticated read reviews" on public.customer_reviews for select to authenticated using (true);
+-- Review read access is intentionally withheld until staff-specific authorization policies are installed.
 -- Writes to store hours, care guides and luxwear_content remain restricted until staff authorization is implemented.
