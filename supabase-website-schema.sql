@@ -1,7 +1,7 @@
 -- LUX WEAR website shared content schema
 -- Run this script in Supabase SQL Editor before publishing these website pages.
-create table if not exists public.store_hours (day_of_week integer primary key check(day_of_week between 0 and 6), is_closed boolean not null default false, open_time time, close_time time, updated_at timestamptz not null default now(), check (is_closed or (open_time is not null and close_time is not null)));
-create table if not exists public.care_guides (code text primary key, product_name text not null default '', material text not null default '', washing_instructions text not null default '', drying_instructions text not null default '', ironing_instructions text not null default '', warnings text not null default '', is_active boolean not null default true, updated_at timestamptz not null default now());
+create table if not exists public.store_hours (day_of_week integer primary key check(day_of_week between 0 and 6), day_name_ar text not null, day_name_en text not null, is_closed boolean not null default false, open_time time, close_time time, updated_at timestamptz not null default now(), check (is_closed or (open_time is not null and close_time is not null)));
+create table if not exists public.care_guides (code text primary key, product_name text not null default '', material text not null default '', washing_instructions text not null default '', drying_instructions text not null default '', ironing_instructions text not null default '', warnings text not null default '', product_name_en text not null default '', material_en text not null default '', washing_instructions_en text not null default '', drying_instructions_en text not null default '', ironing_instructions_en text not null default '', warnings_en text not null default '', is_active boolean not null default true, updated_at timestamptz not null default now());
 create table if not exists public.luxwear_content (content_key text primary key, payload jsonb not null default '{}'::jsonb, is_published boolean not null default false, updated_at timestamptz not null default now());
 create table if not exists public.customer_reviews (id bigint generated always as identity primary key, customer_name text not null default '', phone text not null default '', language text not null default 'ar', answers jsonb not null default '{}'::jsonb, status text not null default 'pending', created_at timestamptz not null default now());
 alter table public.store_hours enable row level security; alter table public.care_guides enable row level security; alter table public.luxwear_content enable row level security; alter table public.customer_reviews enable row level security;
@@ -13,13 +13,13 @@ drop policy if exists "Public submit reviews" on public.customer_reviews; create
 -- Writes to store hours, care guides and luxwear_content remain restricted until staff authorization is implemented.
 
 -- Initial schedule matching the site's fallback hours (Sunday=0).
-insert into public.store_hours(day_of_week,is_closed,open_time,close_time)
+insert into public.store_hours(day_of_week,day_name_ar,day_name_en,is_closed,open_time,close_time)
 values
- (0,false,'12:00','00:30'),
- (1,false,'12:00','00:30'),
- (2,false,'12:00','00:30'),
- (3,false,'12:00','00:30'),
- (4,false,'12:00','00:30'),
- (5,false,'13:00','01:30'),
- (6,false,'12:00','00:30')
+ (0,'الأحد','Sunday',false,'12:00','00:30'),
+ (1,'الإثنين','Monday',false,'12:00','00:30'),
+ (2,'الثلاثاء','Tuesday',false,'12:00','00:30'),
+ (3,'الأربعاء','Wednesday',false,'12:00','00:30'),
+ (4,'الخميس','Thursday',false,'12:00','00:30'),
+ (5,'الجمعة','Friday',false,'13:00','01:30'),
+ (6,'السبت','Saturday',false,'12:00','00:30')
 on conflict (day_of_week) do nothing;
