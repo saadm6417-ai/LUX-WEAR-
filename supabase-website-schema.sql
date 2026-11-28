@@ -11,3 +11,15 @@ drop policy if exists "Public read published content" on public.luxwear_content;
 drop policy if exists "Public submit reviews" on public.customer_reviews; create policy "Public submit reviews" on public.customer_reviews for insert to anon, authenticated with check (status = 'pending');
 -- Review read access is intentionally withheld until staff-specific authorization policies are installed.
 -- Writes to store hours, care guides and luxwear_content remain restricted until staff authorization is implemented.
+
+-- Initial schedule matching the site's fallback hours (Sunday=0).
+insert into public.store_hours(day_of_week,is_closed,open_time,close_time)
+values
+ (0,false,'12:00','00:30'),
+ (1,false,'12:00','00:30'),
+ (2,false,'12:00','00:30'),
+ (3,false,'12:00','00:30'),
+ (4,false,'12:00','00:30'),
+ (5,false,'13:00','01:30'),
+ (6,false,'12:00','00:30')
+on conflict (day_of_week) do nothing;
