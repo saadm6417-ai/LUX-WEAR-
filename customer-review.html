@@ -48,8 +48,10 @@ header{ text-align:center;padding:0 5px 8px }
 <p>نقدّر وقتك واهتمامك، ونسعد بمشاركة رأيك بكل صراحة.</p>
 <p>كل رأي وملاحظة منك بتمثل لينا فرصة جديدة للتطور، وبتساعدنا نفهم احتياجاتك بشكل أفضل، ونقدم لك دايماً تجربة تليق بثقتك وتكون عند حسن ظنك.</p>
 <div class="signature">LUX WEAR</div><p>سعداء دائماً باختيارك لنا ❤️</p><a class="home-button" id="homeButton" href="https://saadm6417-ai.github.io/LUX-WEAR-/">الصفحة الرئيسية</a></section>
-</main><script>
-const SCRIPT_URL="https://script.google.com/macros/s/AKfycbzMbRgOUfrRBVJDVdCDr803be3uY-vLuKZc-pBVtyGrUT5cbD69tVDa9jaxnwyXjy29/exec";
+</main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./supabase-config.js"></script>
+<script>
+const SCRIPT_URL="";
 const questions=[
 {q:"كيف تقيّم تجربتك بشكل عام مع LUX WEAR؟",o:["ممتازة جداً","ممتازة","جيدة","تحتاج إلى تحسين"]},
 {q:"كيف قمت بالشراء من LUX WEAR؟",o:["من خلال زيارة المتجر","من خلال الشراء أونلاين"]},
@@ -86,7 +88,7 @@ finishTitle:"شكراً لثقتك بنا ❤️",finish1:"نقدّر وقتك �
 finish2:"كل رأي وملاحظة منك بتمثل لينا فرصة جديدة للتطور، وبتساعدنا نفهم احتياجاتك بشكل أفضل، ونقدم لك دايماً تجربة تليق بثقتك وتكون عند حسن ظنك.",
 finish3:"سعداء دائماً باختيارك لنا ❤️",home:"الصفحة الرئيسية",
 required:"من فضلك أكمل البيانات المطلوبة.",sendError:"حصلت مشكلة أثناء الإرسال. حاول مرة أخرى.",
-unlinked:"الصفحة لم يتم ربطها بجوجل شيت بعد. أضف رابط Apps Script أولاً."
+unlinked:"تعذر الاتصال بقاعدة البيانات حاليًا. حاول مرة أخرى بعد قليل."
 },
 en:{
 brand:"LUX WEAR",kicker:"CUSTOMER EXPERIENCE",title:"Your opinion matters to us.. and your trust means everything ❤️",
@@ -150,17 +152,17 @@ form.addEventListener('submit',async e=>{
 e.preventDefault();
 const f=e.currentTarget,c=copy[language];
 if(!f.reportValidity())return;
-if(!SCRIPT_URL){error.style.display='block';error.textContent=c.unlinked;return}
+if(!window.luxwearSupabase){error.style.display='block';error.textContent=c.sendError;return}
 const fd=new FormData(f);
 const now=new Date();
 const timeParts=new Intl.DateTimeFormat('en-US',{timeZone:'Africa/Cairo',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h12'}).formatToParts(now);
 const stamp=Object.fromEntries(timeParts.filter(x=>x.type!=='literal').map(x=>[x.type,x.value]));
 const submittedAt=`${stamp.day}/${stamp.month}/${stamp.year} ${stamp.hour}:${stamp.minute}:${stamp.second} ${stamp.dayPeriod.toUpperCase()}`;
-const data={customerName:fd.get('customerName'),phone:fd.get('phone'),submittedAt};
-questions.forEach((q,i)=>data['q'+(i+1)]=fd.get('q'+(i+1))||'');
+const answers={};questions.forEach((q,i)=>answers['q'+(i+1)]=fd.get('q'+(i+1))||'');
 btn.disabled=true;btn.textContent=c.sending;error.style.display='none';
 try{
-await fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(data)});
+const {error:insertError}=await window.luxwearSupabase.from('customer_reviews').insert({customer_name:String(fd.get('customerName')||'').trim(),phone:String(fd.get('phone')||'').trim(),language,answers,status:'pending'});
+if(insertError)throw insertError;
 f.style.display='none';document.getElementById('finish').style.display='block';window.scrollTo({top:0,behavior:'smooth'});
 }catch(ex){
 btn.disabled=false;btn.textContent=c.submit;error.style.display='block';error.textContent=c.sendError;
