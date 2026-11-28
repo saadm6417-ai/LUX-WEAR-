@@ -73,11 +73,24 @@ if (session) {
       const [day,date,time] = dateParts(record.created_at);
       return '<tr><td>'+esc(day)+'</td><td>'+esc(date)+'</td><td>'+esc(time)+'</td><td>'+esc(record.customer_name)+'</td><td>'+esc(record.phone)+'</td>'+
         questions.map((_,i)=>'<td>'+esc(answerAt(record.answers,i) || '—')+'</td>').join('')+
-        '<td><button class="btn" type="button" data-review-id="'+esc(record.id)+'">عرض</button></td></tr>';
-    }).join('') : '<tr><td colspan="17">لا توجد تقييمات مطابقة.</td></tr>';
-    table.querySelectorAll('[data-review-id]').forEach(button => button.addEventListener('click', () => {
-      selected = records.find(record => record.id === button.dataset.reviewId);
-      if (selected) renderDetail(selected);
+        '<td>'+esc(record.status||'pending')+'</td><td><button class="btn" type="button" data-review-id="'+esc(record.id)+'">عرض</button> '+
+        (record.status==='approved'?'': '<button class="btn" type="button" data-status="approved" data-review-id="'+esc(record.id)+'">اعتماد</button> ')+
+        (record.status==='rejected'?'': '<button class="btn" type="button" data-status="rejected" data-review-id="'+esc(record.id)+'">رفض</button>')+'</td></tr>';
+    }).join('') : '<tr><td colspan="18">لا توجد تقييمات مطابقة.</td></tr>';
+    table.querySelectorAll('[data-review-id]').forEach(button => button.addEventListener('click', async () => {
+      const record = records.find(item => item.id === button.dataset.reviewId);
+      if (!record) return;
+      if (!button.dataset.status) { selected = record; renderDetail(selected); return; }
+      const { data: { user } } = await supabase.auth.getUser();
+      const { error } = await supabase.from('customer_reviews').update({
+        status: button.dataset.status, reviewed_at: new Date().toISOString(), reviewed_by: user.id
+      }).eq('id', record.id);
+      if (error) { if (notice) notice.textContent = 'تعذر تحديث حالة التقييم: '+error.message; return; }
+      record.status = button.dataset.status;
+      record.reviewed_at = new Date().toISOString();
+      record.reviewed_by = user.id;
+      if (notice) notice.textContent = record.status === 'approved' ? 'تم اعتماد التقييم.' : 'تم رفض التقييم.';
+      render();
     }));
   }
   async function loadReviews() {
