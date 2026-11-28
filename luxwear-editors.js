@@ -1,7 +1,7 @@
 import { supabase, requireLuxAdmin } from './luxwear-supabase.js';
 const session = await requireLuxAdmin();
 if(session){
- const $=id=>document.getElementById(id);
+ const $=id=>id.startsWith('#')||id.startsWith('[')?document.querySelector(id):document.getElementById(id);
  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const msg=(id,s)=>{if($(id))$(id).textContent=s};
  let care=[],editingCare=null,hours=[],contents=[],policy=null,settings=[];
