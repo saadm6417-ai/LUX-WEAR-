@@ -13,8 +13,8 @@ returns boolean
 language sql
 stable
 security definer
-set search_path = pg_catalog
-as $$
+set search_path = pg_catalog, auth
+as $
   select exists (
     select 1 from public.admin_users au
     where au.user_id = auth.uid()
