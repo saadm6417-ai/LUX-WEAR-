@@ -29,7 +29,7 @@ form?.addEventListener('submit', async event => {
     phone,
     language,
     answers,
-    status: 'new'
+    status: 'pending'
   });
 
   if (error) {
