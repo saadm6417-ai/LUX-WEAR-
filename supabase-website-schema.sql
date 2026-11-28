@@ -1,63 +1,13 @@
 -- LUX WEAR website shared content schema
 -- Run this script in Supabase SQL Editor before publishing these website pages.
-
-create table if not exists public.store_hours (
-  day_of_week integer primary key check(day_of_week between 0 and 6),
-  is_closed boolean not null default false,
-  open_time time,
-  close_time time,
-  updated_at timestamptz not null default now(),
-  check (is_closed or (open_time is not null and close_time is not null))
-);
-
-create table if not exists public.care_guides (
-  code text primary key,
-  product_name text not null default '',
-  material text not null default '',
-  washing_instructions text not null default '',
-  drying_instructions text not null default '',
-  ironing_instructions text not null default '',
-  warnings text not null default '',
-  is_active boolean not null default true,
-  updated_at timestamptz not null default now()
-);
-
-create table if not exists public.luxwear_content (
-  content_key text primary key,
-  payload jsonb not null default '{}'::jsonb,
-  is_published boolean not null default false,
-  updated_at timestamptz not null default now()
-);
-
-create table if not exists public.customer_reviews (
-  id bigint generated always as identity primary key,
-  customer_name text not null default '',
-  phone text not null default '',
-  language text not null default 'ar',
-  answers jsonb not null default '{}'::jsonb,
-  status text not null default 'pending',
-  created_at timestamptz not null default now()
-);
-
-alter table public.store_hours enable row level security;
-alter table public.care_guides enable row level security;
-alter table public.luxwear_content enable row level security;
-alter table public.customer_reviews enable row level security;
-
--- Public website may read hours, active care guides, and published content.
-drop policy if exists "Public read store hours" on public.store_hours;
-create policy "Public read store hours" on public.store_hours for select to anon, authenticated using (true);
-drop policy if exists "Public read active care guides" on public.care_guides;
-create policy "Public read active care guides" on public.care_guides for select to anon, authenticated using (is_active = true);
-drop policy if exists "Public read published content" on public.luxwear_content;
-create policy "Public read published content" on public.luxwear_content for select to anon, authenticated using (is_published = true);
-
--- Public questionnaire submissions are accepted; records are not publicly readable.
-drop policy if exists "Public submit reviews" on public.customer_reviews;
-create policy "Public submit reviews" on public.customer_reviews for insert to anon, authenticated with check (status = 'pending');
-
--- Authenticated staff/owner accounts can read submissions for review management.
-drop policy if exists "Authenticated read reviews" on public.customer_reviews;
-create policy "Authenticated read reviews" on public.customer_reviews for select to authenticated using (true);
-
--- No public write policies for store hours, care guides or page content.
+create table if not exists public.store_hours (day_of_week integer primary key check(day_of_week between 0 and 6), is_closed boolean not null default false, open_time time, close_time time, updated_at timestamptz not null default now(), check (is_closed or (open_time is not null and close_time is not null)));
+create table if not exists public.care_guides (code text primary key, product_name text not null default '', material text not null default '', washing_instructions text not null default '', drying_instructions text not null default '', ironing_instructions text not null default '', warnings text not null default '', is_active boolean not null default true, updated_at timestamptz not null default now());
+create table if not exists public.luxwear_content (content_key text primary key, payload jsonb not null default '{}'::jsonb, is_published boolean not null default false, updated_at timestamptz not null default now());
+create table if not exists public.customer_reviews (id bigint generated always as identity primary key, customer_name text not null default '', phone text not null default '', language text not null default 'ar', answers jsonb not null default '{}'::jsonb, status text not null default 'pending', created_at timestamptz not null default now());
+alter table public.store_hours enable row level security; alter table public.care_guides enable row level security; alter table public.luxwear_content enable row level security; alter table public.customer_reviews enable row level security;
+drop policy if exists "Public read store hours" on public.store_hours; create policy "Public read store hours" on public.store_hours for select to anon, authenticated using (true);
+drop policy if exists "Public read active care guides" on public.care_guides; create policy "Public read active care guides" on public.care_guides for select to anon, authenticated using (is_active = true);
+drop policy if exists "Public read published content" on public.luxwear_content; create policy "Public read published content" on public.luxwear_content for select to anon, authenticated using (is_published = true);
+drop policy if exists "Public submit reviews" on public.customer_reviews; create policy "Public submit reviews" on public.customer_reviews for insert to anon, authenticated with check (status = 'pending');
+drop policy if exists "Authenticated read reviews" on public.customer_reviews; create policy "Authenticated read reviews" on public.customer_reviews for select to authenticated using (true);
+-- Writes to store hours, care guides and luxwear_content remain restricted until staff authorization is implemented.
