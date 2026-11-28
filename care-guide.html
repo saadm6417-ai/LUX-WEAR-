@@ -36,7 +36,7 @@ async function loadLuxCareGuides(){
     ['◌',['تعليمات التجفيف','Drying'],[row.drying_instructions||'—',row.drying_instructions_en||'—']],
     ['☼',['تعليمات الكي','Ironing'],[row.ironing_instructions||'—',row.ironing_instructions_en||'—']]
    ];
-   guides[String(row.code).toUpperCase()]={name:[row.product_name||row.code,row.product_name_en||row.product_name||row.code],desc:(row.material||'')+' / '+(row.material_en||''),warning:[row.warnings||'',row.warnings_en||''],items};
+   guides[String(row.code).toUpperCase()]={name:[row.product_name||row.code,row.product_name_en||row.product_name||row.code],desc:[row.material||'إرشادات عامة',row.material_en||'General Guidelines'],warning:[row.warnings||'',row.warnings_en||''],items};
   });
  }catch(error){console.warn('LUX WEAR care guide database unavailable; showing built-in guide data.',error)}
 }
@@ -57,9 +57,9 @@ function renderLanguage(){
  if($('careResult').classList.contains('show'))show(false);
 }
 function show(scroll=true){const code=$('careCode').value.trim().toUpperCase(),g=guides[code],result=$('careResult'),en=lang==='en';$('careError').style.display='none';result.classList.remove('show');if(!g){$('careError').style.display='block';return;}
- $('careName').textContent=g.name[en?1:0];$('careDesc').textContent=en?g.desc.replace('إرشادات عامة','General Guidelines'):g.desc.replace('General Guidelines','إرشادات عامة');$('careCodeTag').textContent=code;$('careWarning').textContent=words[lang].warning+g.warning[en?1:0];$('careGrid').innerHTML=g.items.map(x=>`<article class="tile"><div class="ico">${x[0]}</div><b>${x[1][en?1:0]}</b><p>${x[2][en?1:0]}</p></article>`).join('');result.classList.add('show');if(scroll)result.scrollIntoView({behavior:'smooth',block:'nearest'});
+ $('careName').textContent=g.name[en?1:0];$('careDesc').textContent=Array.isArray(g.desc)?g.desc[en?1:0]:(en?g.desc.replace('إرشادات عامة','General Guidelines'):g.desc.replace('General Guidelines','إرشادات عامة'));$('careCodeTag').textContent=code;$('careWarning').textContent=words[lang].warning+g.warning[en?1:0];$('careGrid').innerHTML=g.items.map(x=>`<article class="tile"><div class="ico">${x[0]}</div><b>${x[1][en?1:0]}</b><p>${x[2][en?1:0]}</p></article>`).join('');result.classList.add('show');if(scroll)result.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 $('findCare').addEventListener('click',()=>show());$('careCode').addEventListener('keydown',e=>{if(e.key==='Enter')show()});$('language').addEventListener('click',()=>{lang=lang==='ar'?'en':'ar';renderLanguage()});renderLanguage();
-loadLuxCareGuides();
+loadLuxCareGuides().then(()=>{if($('careResult').classList.contains('show'))show(false)});
 })();
 </script></body></html>
