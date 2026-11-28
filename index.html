@@ -1257,18 +1257,20 @@ html[dir="ltr"] .grid > a.action-card.hours-card .hours-live small {
           <span class="hours-bottom"><span class="hours-more"><span data-ar="عرض المزيد" data-en="More">عرض المزيد</span><i aria-hidden="true">›</i></span><span class="hours-bottom-note" data-ar="تفاصيل باقي المواعيد" data-en="See all opening hours">تفاصيل باقي المواعيد</span></span>
         </a>
       </div>
-    </section><footer class="footer"><div class="brand">LUX WEAR</div><p><span data-ar="شكراً لاختيارك" data-en="Thank you for choosing us">شكراً لاختيارك</span><span data-ar="نسعد بخدمتك دائماً" data-en="We are always happy to serve you">نسعد بخدمتك دائماً</span></p><div class="small">ELEGANCE IN EVERY DETAIL</div></footer><script>(()=>{
+    </section><footer class="footer"><div class="brand">LUX WEAR</div><p><span data-ar="شكراً لاختيارك" data-en="Thank you for choosing us">شكراً لاختيارك</span><span data-ar="نسعد بخدمتك دائماً" data-en="We are always happy to serve you">نسعد بخدمتك دائماً</span></p><div class="small">ELEGANCE IN EVERY DETAIL</div></footer><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./supabase-config.js"></script>
+<script>(()=>{
 const root=document.documentElement,toggle=document.getElementById('languageToggle');
 let language=((navigator.language||'ar').toLowerCase().startsWith('ar'))?'ar':'en';
-const weeklyHours={0:{open:720,close:30},1:{open:720,close:30},2:{open:720,close:30},3:{open:720,close:30},4:{open:720,close:30},5:{open:780,close:90},6:{open:720,close:30}};
+let weeklyHours={0:{open:720,close:30},1:{open:720,close:30},2:{open:720,close:30},3:{open:720,close:30},4:{open:720,close:30},5:{open:780,close:90},6:{open:720,close:30}};
 const dayNames={Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6};
 const words={ar:{open:'مفتوح الآن',closed:'مغلق',closing:'يغلق عند الساعة',opening:'يفتح عند الساعة'},en:{open:'OPEN',closed:'CLOSED',closing:'Closes at',opening:'Opens at'}};
 function cairoNow(){const parts=new Intl.DateTimeFormat('en-US',{timeZone:'Africa/Cairo',weekday:'short',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date());const v={};for(const p of parts)v[p.type]=p.value;return {day:dayNames[v.weekday],minute:Number(v.hour)*60+Number(v.minute)}}
 function formatTime(total){const n=((total%1440)+1440)%1440,h=Math.floor(n/60),m=n%60,hh=h%12||12;const suffix=language==='ar'?(h<12?'ص':'م'):(h<12?'AM':'PM');return `${hh}:${String(m).padStart(2,'0')} ${suffix}`}
 function updateHours(){const {day,minute}=cairoNow(),today=weeklyHours[day],prevDay=(day+6)%7,prev=weeklyHours[prevDay];let isOpen=false,closeAt=0,nextOpenDay=day;
-if(minute>=today.open){isOpen=true;closeAt=today.close+1440;}
-else if(minute<prev.close){isOpen=true;closeAt=prev.close;}
-else{nextOpenDay=minute<today.open?day:(day+1)%7;}
+if(!today.closed&&minute>=today.open){isOpen=true;closeAt=today.close+1440;}
+else if(!prev.closed&&minute<prev.close){isOpen=true;closeAt=prev.close;}
+else{nextOpenDay=day;for(let i=0;i<7;i++){const candidate=(day+i)%7;if(!weeklyHours[candidate].closed){nextOpenDay=candidate;break;}}}
 const state=document.getElementById('hoursState'),next=document.getElementById('hoursNext'),live=document.getElementById('hoursLive');
 if(!state||!next||!live)return;
 live.classList.toggle('open',isOpen);live.classList.toggle('closed',!isOpen);const card=live.closest('.hours-card');if(card){card.classList.toggle('open',isOpen);card.classList.toggle('closed',!isOpen);}
@@ -1277,5 +1279,11 @@ if(isOpen){const closeMinute=closeAt%1440;next.textContent=`${words[language].cl
 else{next.textContent=`${words[language].opening} ${formatTime(weeklyHours[nextOpenDay].open)}`;}
 }
 function setLanguage(next){language=next;const ar=language==='ar';root.lang=language;root.dir=ar?'rtl':'ltr';document.title=ar?'LUX WEAR | الصفحة الرئيسية':'LUX WEAR | Home';document.querySelectorAll('[data-ar][data-en]').forEach(el=>el.textContent=el.dataset[language]);toggle.textContent=ar?'English':'العربية';toggle.setAttribute('aria-label',ar?'Switch to English':'التبديل إلى العربية');updateHours()}
-toggle.addEventListener('click',()=>setLanguage(language==='ar'?'en':'ar'));setLanguage(language);updateHours();setInterval(updateHours,30000);
+async function loadHomepageContent(){const db=window.luxwearSupabase;if(!db)return;try{const {data,error}=await db.from('luxwear_content').select('payload').eq('content_key','homepage').eq('is_published',true).maybeSingle();if(error||!data?.payload)return;const payload=data.payload;
+if(payload.texts&&typeof payload.texts==='object'){for(const [selector,values] of Object.entries(payload.texts)){if(!values||typeof values!=='object')continue;document.querySelectorAll(selector).forEach(el=>{if(typeof values.ar==='string')el.dataset.ar=values.ar;if(typeof values.en==='string')el.dataset.en=values.en;});}}
+if(payload.links&&typeof payload.links==='object'){for(const [selector,url] of Object.entries(payload.links)){if(typeof url!=='string'||!/^https?:|^(?:\.\.?\/|#)/i.test(url))continue;document.querySelectorAll(selector).forEach(el=>{if(el.matches('a'))el.href=url;});}}
+setLanguage(language);
+}catch(e){console.warn('Homepage content could not be loaded.',e);}}
+async function loadHomepageHours(){const db=window.luxwearSupabase;if(!db)return;try{const {data,error}=await db.from('store_hours').select('day_of_week,is_closed,open_time,close_time');if(error||!Array.isArray(data)||data.length!==7)return;const next={};for(const r of data){const mins=t=>{const [h,m]=String(t||'00:00').split(':').map(Number);return h*60+m;};next[r.day_of_week]=r.is_closed?{closed:true,open:0,close:0}:{open:mins(r.open_time),close:mins(r.close_time)};}if(Object.keys(next).length===7){weeklyHours=next;updateHours();}}catch(e){console.warn('Homepage hours could not be loaded.',e);}}
+toggle.addEventListener('click',()=>setLanguage(language==='ar'?'en':'ar'));setLanguage(language);updateHours();loadHomepageHours();loadHomepageContent();setInterval(updateHours,30000);
 })();</script></main></body></html>
