@@ -91,7 +91,13 @@ body{padding:0;display:flex;justify-content:center;align-items:flex-start}
 <div class="tagline" data-ar="أسلوبك يستحق الأفضل" data-en="Your style deserves the best">أسلوبك يستحق الأفضل</div>
 <div class="heart">♥</div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./supabase-config.js"></script>
 <script>
-(()=>{const root=document.getElementById('policy');const button=document.getElementById('policy-lang');let language='ar';button.addEventListener('click',()=>{language=language==='ar'?'en':'ar';root.lang=language;root.dir=language==='ar'?'rtl':'ltr';button.textContent=language==='ar'?'English':'العربية';root.querySelectorAll('[data-ar][data-en]').forEach(el=>el.textContent=language==='ar'?el.dataset.ar:el.dataset.en);});})();
+(()=>{const root=document.getElementById('policy');const button=document.getElementById('policy-lang');let language='ar';
+function render(){root.lang=language;root.dir=language==='ar'?'rtl':'ltr';button.textContent=language==='ar'?'English':'العربية';root.querySelectorAll('[data-ar][data-en]').forEach(el=>el.textContent=language==='ar'?el.dataset.ar:el.dataset.en);}
+button.addEventListener('click',()=>{language=language==='ar'?'en':'ar';render();});
+async function loadPolicyContent(){try{const db=window.luxwearSupabase;if(!db)return;const {data,error}=await db.from('luxwear_content').select('payload').eq('content_key','policy').eq('is_published',true).maybeSingle();if(error||!data?.payload)return;const elements=data.payload.elements;if(!Array.isArray(elements))return;for(const item of elements){if(!item||typeof item.selector!=='string')continue;const nodes=root.querySelectorAll(item.selector);nodes.forEach(el=>{if(typeof item.ar==='string')el.dataset.ar=item.ar;if(typeof item.en==='string')el.dataset.en=item.en;});}render();}catch(e){console.warn('Policy content could not be loaded.',e);}}
+render();loadPolicyContent();})();
 </script>
 </body></html>
