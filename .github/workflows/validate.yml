@@ -1,0 +1,38 @@
+name: Validate LUX WEAR integration
+on:
+  push:
+    branches:
+      - integration/dashboard-survey-connect
+  pull_request:
+    branches:
+      - main
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check JavaScript module syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in ./*.js; do
+            [ -f "$file" ] || continue
+            echo "Checking $file"
+            node --input-type=module --check < "$file"
+          done
+      - name: Check required integration files
+        shell: bash
+        run: |
+          test -f luxwear-supabase.js
+          test -f luxwear-login.js
+          test -f luxwear-dashboard.js
+          test -f luxwear-editors.js
+          test -f luxwear-survey.js
+          test -f luxwear-home.js
+          test -f luxwear-policy.js
+          test -f luxwear-store.js
+          test -f luxwear-employees.js
+          test -f luxwear-profile.js
