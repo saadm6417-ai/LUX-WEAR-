@@ -25,6 +25,21 @@ LW103:{name:['العناية بالوتر بروف','Waterproof Care'],desc:'WAT
 LW104:{name:['العناية بالتريكو','Knitwear Care'],desc:'KNITWEAR CARE · '+(lang==='ar'?'إرشادات عامة':'General Guidelines'),warning:['الخامات المخلوطة تختلف في طريقة العناية. راجع ملصق القطعة لتحديد الغسيل والكي المناسبين.','Blended fabrics require different care. Check the item’s label for suitable washing and ironing instructions.'],items:[['✧',['الغسيل','Washing'],['اتبع تعليمات الملصق واستخدم دورة لطيفة إذا كانت مسموحة.','Follow the label instructions and use a gentle cycle if permitted.']],['◌',['العصر','Wringing'],['تجنب العصر القوي حتى لا يتغير شكل النسيج.','Avoid wringing tightly to prevent the fabric from losing its shape.']],['☼',['التجفيف','Drying'],['جفف بشكل أفقي إذا كانت تعليمات القطعة تسمح بذلك.','Dry flat if the care instructions allow it.']],['⌂',['التخزين','Storage'],['اطوِ القطعة بدل تعليقها إذا كان وزن النسيج قد يمددها.','Fold the item instead of hanging it if its weight may stretch the fabric.']]]},
 LW105:{name:['العناية بالمليتون المبطن','Fleece-Lined Melton Care'],desc:'FLEECE-LINED MELTON · '+(lang==='ar'?'إرشادات عامة':'General Guidelines'),warning:['وجود بطانة أو خامات مركبة قد يغير طريقة التنظيف؛ اتبع تعليمات القطعة المحددة.','A lining or combined materials may affect cleaning. Follow the specific care instructions for the item.'],items:[['✧',['التنظيف','Cleaning'],['اتبع تعليمات الملصق ولا تستخدم التنظيف الجاف إلا إذا كان مسموحًا.','Follow the label instructions and use dry cleaning only if permitted.']],['◌',['الغسيل','Washing'],['تجنب الماء الساخن والمنظفات القوية.','Avoid hot water and strong detergents.']],['☼',['التجفيف','Drying'],['ابتعد عن الحرارة المباشرة للحفاظ على البطانة.','Keep away from direct heat to protect the lining.']],['⌂',['التخزين','Storage'],['احفظها جافة وبعيدة عن الرطوبة.','Store it dry and away from moisture.']]]}
 };
+async function loadLuxCareGuides(){
+ try{
+  const { supabase } = await import('./luxwear-supabase.js');
+  const { data, error } = await supabase.from('care_guides').select('*').eq('is_active',true);
+  if(error) throw error;
+  (data||[]).forEach(row=>{
+   const items=[
+    ['✧',['تعليمات الغسيل','Washing'],[row.washing_instructions||'—',row.washing_instructions_en||'—']],
+    ['◌',['تعليمات التجفيف','Drying'],[row.drying_instructions||'—',row.drying_instructions_en||'—']],
+    ['☼',['تعليمات الكي','Ironing'],[row.ironing_instructions||'—',row.ironing_instructions_en||'—']]
+   ];
+   guides[String(row.code).toUpperCase()]={name:[row.product_name||row.code,row.product_name_en||row.product_name||row.code],desc:[row.material||'إرشادات عامة',row.material_en||'General Guidelines'],warning:[row.warnings||'',row.warnings_en||''],items};
+  });
+ }catch(error){console.warn('LUX WEAR care guide database unavailable; showing built-in guide data.',error)}
+}
 function renderLanguage(){
  const w=words[lang],en=lang==='en';
  document.documentElement.lang=lang;document.documentElement.dir=en?'ltr':'rtl';
@@ -42,8 +57,9 @@ function renderLanguage(){
  if($('careResult').classList.contains('show'))show(false);
 }
 function show(scroll=true){const code=$('careCode').value.trim().toUpperCase(),g=guides[code],result=$('careResult'),en=lang==='en';$('careError').style.display='none';result.classList.remove('show');if(!g){$('careError').style.display='block';return;}
- $('careName').textContent=g.name[en?1:0];$('careDesc').textContent=en?g.desc.replace('إرشادات عامة','General Guidelines'):g.desc.replace('General Guidelines','إرشادات عامة');$('careCodeTag').textContent=code;$('careWarning').textContent=words[lang].warning+g.warning[en?1:0];$('careGrid').innerHTML=g.items.map(x=>`<article class="tile"><div class="ico">${x[0]}</div><b>${x[1][en?1:0]}</b><p>${x[2][en?1:0]}</p></article>`).join('');result.classList.add('show');if(scroll)result.scrollIntoView({behavior:'smooth',block:'nearest'});
+ $('careName').textContent=g.name[en?1:0];$('careDesc').textContent=Array.isArray(g.desc)?g.desc[en?1:0]:(en?g.desc.replace('إرشادات عامة','General Guidelines'):g.desc.replace('General Guidelines','إرشادات عامة'));$('careCodeTag').textContent=code;$('careWarning').textContent=words[lang].warning+g.warning[en?1:0];$('careGrid').innerHTML=g.items.map(x=>`<article class="tile"><div class="ico">${x[0]}</div><b>${x[1][en?1:0]}</b><p>${x[2][en?1:0]}</p></article>`).join('');result.classList.add('show');if(scroll)result.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 $('findCare').addEventListener('click',()=>show());$('careCode').addEventListener('keydown',e=>{if(e.key==='Enter')show()});$('language').addEventListener('click',()=>{lang=lang==='ar'?'en':'ar';renderLanguage()});renderLanguage();
+loadLuxCareGuides().then(()=>{if($('careResult').classList.contains('show'))show(false)});
 })();
 </script></body></html>

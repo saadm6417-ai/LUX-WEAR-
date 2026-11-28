@@ -93,5 +93,5 @@ body{padding:0;display:flex;justify-content:center;align-items:flex-start}
 </div>
 <script>
 (()=>{const root=document.getElementById('policy');const button=document.getElementById('policy-lang');let language='ar';button.addEventListener('click',()=>{language=language==='ar'?'en':'ar';root.lang=language;root.dir=language==='ar'?'rtl':'ltr';button.textContent=language==='ar'?'English':'العربية';root.querySelectorAll('[data-ar][data-en]').forEach(el=>el.textContent=language==='ar'?el.dataset.ar:el.dataset.en);});})();
-</script>
+</script><script type="module" src="./luxwear-policy.js"></script>
 </body></html>
