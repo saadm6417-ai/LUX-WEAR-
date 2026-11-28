@@ -1,50 +1,10 @@
 import { supabase } from './luxwear-supabase.js';
 
-const form = document.getElementById('form');
-const errorBox = document.getElementById('error');
-const emailField = document.getElementById('username');
-const passwordField = document.getElementById('password');
-const submit = form?.querySelector('.submit');
-
-if (emailField) {
-  emailField.type = 'email';
-  emailField.autocomplete = 'username';
-  emailField.placeholder = 'أدخل البريد الإلكتروني';
-  const label = document.querySelector('label[for="username"]');
-  if (label) label.textContent = 'البريد الإلكتروني';
-}
-if (new URLSearchParams(location.search).has('access')) {
-  errorBox.textContent = 'هذا الحساب غير مصرح له بدخول لوحة التحكم.';
-}
-const { data: { session } } = await supabase.auth.getSession();
-if (session) {
-  const { data: admin } = await supabase.from('admin_users').select('user_id').eq('user_id',session.user.id).maybeSingle();
-  if (admin) location.replace('admin-dashboard.html');
-}
-form?.addEventListener('submit', async event => {
-  event.preventDefault();
-  event.stopImmediatePropagation();
-  const email = emailField.value.trim();
-  const password = passwordField.value;
-  if (!email || !password) return;
-  submit.disabled = true;
-  submit.textContent = 'جارٍ التحقق...';
-  errorBox.textContent = '';
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) {
-    errorBox.textContent = 'تعذر تسجيل الدخول. تأكد من البريد الإلكتروني وكلمة المرور.';
-    submit.disabled = false;
-    submit.textContent = 'تسجيل الدخول';
-    return;
-  }
-  const { data: admin, error: adminError } = await supabase.from('admin_users')
-    .select('user_id').eq('user_id', data.user.id).maybeSingle();
-  if (adminError || !admin) {
-    await supabase.auth.signOut();
-    errorBox.textContent = 'هذا الحساب غير مضاف ضمن مستخدمي إدارة LUX WEAR.';
-    submit.disabled = false;
-    submit.textContent = 'تسجيل الدخول';
-    return;
-  }
-  location.replace('admin-dashboard.html');
-}, true);
+const form=document.getElementById('form'),errorBox=document.getElementById('error'),emailField=document.getElementById('username'),passwordField=document.getElementById('password'),submit=form?.querySelector('.submit'),forgot=document.getElementById('forgotPassword'),recoveryBox=document.getElementById('recoveryBox');
+if(emailField){emailField.type='email';emailField.autocomplete='username';emailField.placeholder='أدخل البريد الإلكتروني';const label=document.querySelector('label[for="username"]');if(label)label.textContent='البريد الإلكتروني';}
+const isRecovery=new URLSearchParams(location.hash.slice(1)).get('type')==='recovery';
+if(isRecovery){form.style.display='none';forgot.style.display='none';recoveryBox.style.display='block';document.querySelector('h1').textContent='تعيين كلمة مرور جديدة';document.querySelector('.welcome').textContent='أدخل كلمة المرور الجديدة لحسابك';}
+forgot?.addEventListener('click',async e=>{e.preventDefault();const email=emailField.value.trim();if(!email){errorBox.textContent='اكتب البريد الإلكتروني المسجل أولاً.';emailField.focus();return;}forgot.style.pointerEvents='none';errorBox.textContent='جارٍ إرسال رابط الاستعادة...';const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});forgot.style.pointerEvents='auto';errorBox.textContent=error?'تعذر إرسال الرابط: '+error.message:'إذا كان البريد مسجلاً، ستصل رسالة استعادة إليه. راجع صندوق الوارد والرسائل غير المرغوب فيها.';});
+document.getElementById('saveNewPassword')?.addEventListener('click',async()=>{const p=document.getElementById('newPassword').value,c=document.getElementById('confirmPassword').value,btn=document.getElementById('saveNewPassword');if(p.length<8){errorBox.textContent='كلمة المرور يجب أن تكون 8 أحرف على الأقل.';return;}if(p!==c){errorBox.textContent='كلمتا المرور غير متطابقتين.';return;}btn.disabled=true;errorBox.textContent='جارٍ تحديث كلمة المرور...';const {error}=await supabase.auth.updateUser({password:p});btn.disabled=false;if(error){errorBox.textContent='تعذر تحديث كلمة المرور: '+error.message;return;}errorBox.textContent='تم تغيير كلمة المرور بنجاح. يمكنك تسجيل الدخول.';recoveryBox.style.display='none';form.style.display='block';passwordField.value='';});
+if(!isRecovery){const {data:{session}}=await supabase.auth.getSession();if(session){const {data:admin}=await supabase.from('admin_users').select('user_id').eq('user_id',session.user.id).maybeSingle();if(admin)location.replace('admin-dashboard.html');}
+form?.addEventListener('submit',async event=>{event.preventDefault();event.stopImmediatePropagation();const email=emailField.value.trim(),password=passwordField.value;if(!email||!password)return;submit.disabled=true;submit.textContent='جارٍ التحقق...';errorBox.textContent='';const {data,error}=await supabase.auth.signInWithPassword({email,password});if(error){errorBox.textContent='تعذر تسجيل الدخول. تأكد من البريد الإلكتروني وكلمة المرور.';submit.disabled=false;submit.textContent='تسجيل الدخول';return;}const {data:admin,error:adminError}=await supabase.from('admin_users').select('user_id').eq('user_id',data.user.id).maybeSingle();if(adminError||!admin){await supabase.auth.signOut();errorBox.textContent='هذا الحساب غير مضاف ضمن مستخدمي إدارة LUX WEAR.';submit.disabled=false;submit.textContent='تسجيل الدخول';return;}location.replace('admin-dashboard.html');},true);}
