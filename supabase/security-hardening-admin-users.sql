@@ -7,6 +7,7 @@ begin;
 -- A non-recursive allow-list check. SECURITY DEFINER avoids RLS recursion when
 -- admin policies consult admin_users. Keep the function narrowly scoped.
 create schema if not exists private;
+grant usage on schema private to authenticated;
 create or replace function private.is_luxwear_admin()
 returns boolean
 language sql
