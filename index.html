@@ -1265,6 +1265,7 @@ const dayNames={Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6};
 const words={ar:{open:'مفتوح الآن',closed:'مغلق',closing:'يغلق عند الساعة',opening:'يفتح عند الساعة'},en:{open:'OPEN',closed:'CLOSED',closing:'Closes at',opening:'Opens at'}};
 function cairoNow(){const parts=new Intl.DateTimeFormat('en-US',{timeZone:'Africa/Cairo',weekday:'short',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date());const v={};for(const p of parts)v[p.type]=p.value;return {day:dayNames[v.weekday],minute:Number(v.hour)*60+Number(v.minute)}}
 function formatTime(total){const n=((total%1440)+1440)%1440,h=Math.floor(n/60),m=n%60,hh=h%12||12;const suffix=language==='ar'?(h<12?'ص':'م'):(h<12?'AM':'PM');return `${hh}:${String(m).padStart(2,'0')} ${suffix}`}
+window.luxWeeklyHours=weeklyHours;
 function updateHours(){const {day,minute}=cairoNow(),today=weeklyHours[day],prevDay=(day+6)%7,prev=weeklyHours[prevDay];let isOpen=false,closeAt=0,nextOpenDay=day;
 if(minute>=today.open){isOpen=true;closeAt=today.close+1440;}
 else if(minute<prev.close){isOpen=true;closeAt=prev.close;}
@@ -1277,5 +1278,5 @@ if(isOpen){const closeMinute=closeAt%1440;next.textContent=`${words[language].cl
 else{next.textContent=`${words[language].opening} ${formatTime(weeklyHours[nextOpenDay].open)}`;}
 }
 function setLanguage(next){language=next;const ar=language==='ar';root.lang=language;root.dir=ar?'rtl':'ltr';document.title=ar?'LUX WEAR | الصفحة الرئيسية':'LUX WEAR | Home';document.querySelectorAll('[data-ar][data-en]').forEach(el=>el.textContent=el.dataset[language]);toggle.textContent=ar?'English':'العربية';toggle.setAttribute('aria-label',ar?'Switch to English':'التبديل إلى العربية');updateHours()}
-toggle.addEventListener('click',()=>setLanguage(language==='ar'?'en':'ar'));setLanguage(language);updateHours();setInterval(updateHours,30000);
-})();</script></main></body></html>
+toggle.addEventListener('click',()=>setLanguage(language==='ar'?'en':'ar'));setLanguage(language);updateHours();window.luxUpdateHours=updateHours;setInterval(updateHours,30000);
+})();</script><script type="module" src="./luxwear-home.js"></script></main></body></html>
